@@ -15,7 +15,7 @@ const TIP_CONTRACT_ABI = [
 const PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY;
 
 const TARGET_ADDRESS = "0xE7E7Ca7C192E5342dd98249F51E82E90ee6c9A7c"; // آدرس کیف پول فرعی به عنوان مقصد
-const AMOUNT_TO_TIP = "0.01"; // مقداری که می‌خواهیم تیپ بدهیم
+const AMOUNT_TO_TIP = "0.0101"; // مقداری که می‌خواهیم تیپ بدهیم
 const MIN_BALANCE_REQUIRED = "0.015"; // حداقل موجودی لازم در کیف پول اصلی برای اجرا
 
 async function main() {
