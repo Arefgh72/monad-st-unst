@@ -27,7 +27,7 @@ jobs:
         run: npm install
 
       - name: Execute the Unstake Script
-        run: node src/4-unstake-script.js
+        run: node src/unstake-script.js
         env:
           # کلید خصوصی را به صورت امن از سکرت‌های گیت‌هاب می‌خواند
           WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
