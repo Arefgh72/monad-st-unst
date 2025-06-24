@@ -27,7 +27,7 @@ jobs:
         run: npm install
 
       - name: Execute the Stake Script
-        run: node src/3-stake-script.js
+        run: node src/stake-script.js
         env:
           # کلید خصوصی را به صورت امن از سکرت‌های گیت‌هاب می‌خواند
           WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
