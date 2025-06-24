@@ -1,0 +1,33 @@
+# .github/workflows/reverse-tip.yml
+
+name: Send Reverse Tip
+
+on:
+  # به شما اجازه می‌دهد این عملیات را به صورت دستی هم برای تست اجرا کنید
+  workflow_dispatch:
+
+  schedule:
+    # اجرا در ساعت 18:30 UTC (ساعت ۲۲:۰۰ یا ۱۰ شب به وقت ایران) هر روز
+    - cron: '30 18 * * *'
+
+jobs:
+  reverse-tip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install project dependencies
+        run: npm install
+
+      - name: Execute the Reverse Tip Script
+        run: node src/reverse-tip.js
+        env:
+          # !!! توجه: این ورک‌فلو از کلید خصوصی کیف پول فرعی استفاده می‌کند !!!
+          SECONDARY_WALLET_PRIVATE_KEY: ${{ secrets.SECONDARY_WALLET_PRIVATE_KEY }}
