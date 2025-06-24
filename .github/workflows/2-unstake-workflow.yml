@@ -1,0 +1,33 @@
+# .github/workflows/2-unstake-workflow.yml
+
+name: Unstake Monad Tokens
+
+on:
+  # این خط به شما اجازه می‌دهد که این عملیات را به صورت دستی هم برای تست اجرا کنید
+  workflow_dispatch:
+
+  schedule:
+    # اجرا در ساعت 16:30 UTC (ساعت ۲۰:۰۰ یا ۸ شب به وقت ایران) هر روز
+    - cron: '30 16 * * *'
+
+jobs:
+  unstake:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install project dependencies (ethers.js)
+        run: npm install
+
+      - name: Execute the Unstake Script
+        run: node src/4-unstake-script.js
+        env:
+          # کلید خصوصی را به صورت امن از سکرت‌های گیت‌هاب می‌خواند
+          WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
