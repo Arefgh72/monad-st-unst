@@ -1,0 +1,14 @@
+{
+  "name": "monad-staking-bot",
+  "version": "1.0.0",
+  "description": "A bot to automatically stake and unstake tokens on the Monad testnet.",
+  "main": "src/3-stake-script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^6.12.1"
+  }
+}
