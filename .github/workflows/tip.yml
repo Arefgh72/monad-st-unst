@@ -1,0 +1,33 @@
+# .github/workflows/tip.yml
+
+name: Send Main Tip
+
+on:
+  # به شما اجازه می‌دهد این عملیات را به صورت دستی هم برای تست اجرا کنید
+  workflow_dispatch:
+  
+  schedule:
+    # اجرا در ساعت 9:30 UTC (ساعت ۱۳:۰۰ یا ۱ ظهر به وقت ایران) هر روز
+    - cron: '30 9 * * *'
+
+jobs:
+  tip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install project dependencies
+        run: npm install
+
+      - name: Execute the Main Tip Script
+        run: node src/tip.js
+        env:
+          # این ورک‌فلو از کلید خصوصی کیف پول اصلی استفاده می‌کند
+          WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
