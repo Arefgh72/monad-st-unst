@@ -1,0 +1,36 @@
+# .github/workflows/interact.yml
+
+name: Run dApp Interaction
+
+on:
+  # به شما اجازه می‌دهد این عملیات را به صورت دستی هم برای تست اجرا کنید
+  workflow_dispatch:
+  
+  schedule:
+    # زمان‌بندی اول: اجرا در ساعت 8:30 UTC (ساعت ۱۲:۰۰ ظهر به وقت ایران) هر روز
+    - cron: '30 8 * * *'
+    
+    # زمان‌بندی دوم: اجرا در ساعت 19:40 UTC (ساعت ۲۳:۱۰ شب به وقت ایران) هر روز
+    - cron: '40 19 * * *'
+
+jobs:
+  interact:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install project dependencies
+        run: npm install
+
+      - name: Execute the Interaction Script
+        run: node src/interact.js
+        env:
+          # این ورک‌فلو از کلید خصوصی کیف پول اصلی استفاده می‌کند
+          WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
