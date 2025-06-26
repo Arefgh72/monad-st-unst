@@ -1,4 +1,4 @@
-// src/interact.js - نسخه اصلاح شده برای رفع خطای 'provider is not defined'
+// src/interact.js - نسخه نهایی و مقاوم در برابر Timeout
 
 const { ethers } = require("ethers");
 
@@ -17,13 +17,13 @@ const MIN_BALANCE_REQUIRED = "0.01";
 
 /**
  * تابع کمکی برای ارسال تراکنش و انتظار برای رسید آن
- * @param {ethers.JsonRpcProvider} provider - // <<<< (تغییر ۱) provider به عنوان ورودی اضافه شد
- * @param {ethers.Wallet} wallet - نمونه کیف پول امضاکننده
- * @param {object} tx - آبجکت تراکنش ساخته شده
- * @param {string} actionName - نام عملیات برای نمایش در لاگ
+ * @param {ethers.JsonRpcProvider} provider
+ * @param {ethers.Wallet} wallet
+ * @param {object} tx
+ * @param {string} actionName
  * @returns {Promise<ethers.TransactionReceipt|null>}
  */
-async function sendTransaction(provider, wallet, tx, actionName) { // <<<< (تغییر ۱)
+async function sendTransaction(provider, wallet, tx, actionName) {
     console.log(`    > در حال امضا و ارسال تراکنش برای: ${actionName}...`);
     try {
         const txWithGas = await wallet.populateTransaction(tx);
@@ -31,16 +31,23 @@ async function sendTransaction(provider, wallet, tx, actionName) { // <<<< (تغ
         const txResponseHash = await provider.send("eth_sendRawTransaction", [signedTx]);
         
         console.log(`    > تراکنش ارسال شد. هش: ${txResponseHash}`);
-        console.log("    > در انتظار تایید تراکنش...");
+        console.log("    > در انتظار تایید تراکنش (تا ۱۰ دقیقه)...");
         
-        const receipt = await provider.waitForTransaction(txResponseHash, 1, 180);
+        // Timeout به ۶۰۰ ثانیه (۱۰ دقیقه) افزایش یافت
+        const receipt = await provider.waitForTransaction(txResponseHash, 1, 600000); 
         
-        if (receipt.status === 1) {
+        // <<<< (تغییر اصلی) مدیریت بهتر خروجی تابع انتظار >>>>
+        if (receipt && receipt.status === 1) {
             console.log(`    > ✅ تراکنش '${actionName}' با موفقیت تایید شد.`);
             return receipt;
-        } else {
+        } else if (receipt && receipt.status === 0) {
             console.error(`    > ❌ تراکنش '${actionName}' ناموفق بود (reverted).`);
             return null;
+        } else {
+            // اگر بعد از ۱۰ دقیقه رسید دریافت نشود، به جای خطا، یک هشدار می‌دهیم
+            console.warn(`    > ⚠️ هشدار: رسید تراکنش '${actionName}' در مهلت زمانی مشخص دریافت نشد (timeout).`);
+            console.warn(`    > این به معنی شکست تراکنش نیست. لطفاً هش را در اکسپلورر چک کنید: ${txResponseHash}`);
+            return "timeout_warning"; // یک مقدار خاص برای مدیریت در ادامه برمی‌گردانیم
         }
     } catch (error) {
         console.error(`    > ❌ خطا در ارسال یا تایید تراکنش '${actionName}':`, error.message);
@@ -75,15 +82,15 @@ async function main() {
             console.log("⚠️ موجودی کمتر از حد مجاز است. تلاش برای برداشت کارمزدهای جمع‌شده...");
 
             const withdrawTx = await proxyContract.withdrawEther.populateTransaction();
-            const withdrawReceipt = await sendTransaction(provider, wallet, withdrawTx, "برداشت کارمزد"); // <<<< (تغییر ۲) provider پاس داده شد
+            const withdrawReceipt = await sendTransaction(provider, wallet, withdrawTx, "برداشت کارمزد");
 
-            if (withdrawReceipt) {
+            if (withdrawReceipt && withdrawReceipt !== "timeout_warning") {
                 console.log("برداشت موفق بود. انتظار 5 ثانیه و بررسی مجدد موجودی...");
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 balance = await provider.getBalance(wallet.address);
                 console.log(`موجودی جدید: ${ethers.formatEther(balance)} MON`);
             } else {
-                console.error("عملیات برداشت ناموفق بود.");
+                console.error("عملیات برداشت ناموفق بود یا با timeout مواجه شد.");
             }
 
             if (balance < minBalance) {
@@ -98,10 +105,13 @@ async function main() {
             value: feeAmount
         });
         
-        const interactReceipt = await sendTransaction(provider, wallet, interactTx, "تعامل اصلی (interactWithFee)"); // <<<< (تغییر ۳) provider پاس داده شد
+        const interactReceipt = await sendTransaction(provider, wallet, interactTx, "تعامل اصلی (interactWithFee)");
 
-        if (interactReceipt) {
+        // <<<< (تغییر اصلی) مدیریت خروجی نهایی >>>>
+        if (interactReceipt && interactReceipt !== "timeout_warning") {
             console.log("🎉🎉🎉 عملیات تعامل با dApp با موفقیت کامل انجام شد! 🎉🎉🎉");
+        } else if (interactReceipt === "timeout_warning") {
+            console.log("✅ عملیات با موفقیت به شبکه ارسال شد اما منتظر تایید نماندیم. اجرای ورک‌فلو موفق در نظر گرفته می‌شود.");
         } else {
             console.error("عملیات تعامل اصلی ناموفق بود.");
             process.exit(1);
