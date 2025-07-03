@@ -1,0 +1,33 @@
+# .github/workflows/deployer-loop.yml
+
+name: Deploy Contracts Loop
+
+on:
+  # به شما اجازه می‌دهد این عملیات را به صورت دستی هم برای تست اجرا کنید
+  workflow_dispatch:
+  
+  schedule:
+    # اجرا در هر ۶ ساعت
+    - cron: '0 */6 * * *'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install project dependencies (ethers.js)
+        run: npm install
+
+      - name: Execute the Deployment Script
+        run: node src/deployer-loop.js
+        env:
+          # از کلید خصوصی کیف پول اصلی شما استفاده می‌کند
+          WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
