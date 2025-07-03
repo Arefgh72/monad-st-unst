@@ -1,14 +1,15 @@
 {
-  "name": "monad-staking-bot",
+  "name": "monad-bot-suite",
   "version": "1.0.0",
-  "description": "A bot to automatically stake and unstake tokens on the Monad testnet.",
-  "main": "src/3-stake-script.js",
+  "description": "A bot for interacting with and deploying contracts on Monad testnet.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ethers": "^6.12.1"
+    "@openzeppelin/contracts": "^5.0.2",
+    "ethers": "^6.12.1",
+    "solc": "^0.8.20"
   }
 }
